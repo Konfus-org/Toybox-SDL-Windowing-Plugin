@@ -47,9 +47,14 @@ namespace SDLWindowing
 
     void SDLWindow::Close()
     {
+        // We've already been closed...
+        if (_window == nullptr) return;
+
+        // Cleanup...
         SDL_DestroyWindow(_window);
         _window = nullptr;
 
+        // Notify things we've closed
         auto e = Tbx::WindowClosedEvent(GetId());
         Tbx::EventCoordinator::Send(e);
     }
