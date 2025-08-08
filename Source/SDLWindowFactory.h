@@ -10,9 +10,11 @@ namespace SDLWindowing
         void OnLoad() override;
         void OnUnload() override;
 
+        std::shared_ptr<Tbx::IWindow> Create(const std::string& title, const Tbx::Size& size, const Tbx::WindowMode mode) override;
+
     protected:
-        Tbx::IWindow* New() override;
-        void Delete(Tbx::IWindow* window) override;
+        Tbx::IWindow* New();
+        void Delete(Tbx::IWindow* window);
     };
 
     TBX_REGISTER_PLUGIN(SDLWindowFactory);
