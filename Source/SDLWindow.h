@@ -11,11 +11,17 @@ namespace SDLWindowing
 
         Tbx::NativeHandle GetNativeHandle() const override;
         Tbx::NativeWindow GetNativeWindow() const override;
+        Tbx::ProcAddress GetProcAddress() const override;
 
         void Open(const Tbx::WindowMode& mode) override;
         void Close() override;
         void Update() override;
         void Focus() override;
+
+        void SwapBuffers() override;
+
+        int GetSwapInterval() const override;
+        void SetSwapInterval(int interval) override;
 
         const std::string& GetTitle() const override;
         void SetTitle(const std::string& title) override;
@@ -28,6 +34,7 @@ namespace SDLWindowing
 
     private:
         SDL_Window* _window = nullptr;
+        SDL_GLContext _glContext = nullptr;
         Tbx::WindowMode _currentMode = Tbx::WindowMode::Windowed;
         Tbx::Size _size = { 800, 800 };
         std::string _title = "New Window";

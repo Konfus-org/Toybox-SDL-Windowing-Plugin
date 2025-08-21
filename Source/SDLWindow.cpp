@@ -1,4 +1,5 @@
 #include "SDLWindow.h"
+#include <Tbx/App/App.h>
 #include <Tbx/Events/WindowEvents.h>
 #include <Tbx/Events/EventCoordinator.h>
 #include <Tbx/Debug/Debugging.h>
@@ -20,11 +21,43 @@ namespace SDLWindowing
         return _window;
     }
 
+    Tbx::ProcAddress SDLWindow::GetProcAddress() const
+    {
+        return SDL_GL_GetProcAddress;
+    }
+
+    void SDLWindow::SwapBuffers()
+    {
+        SDL_GL_SwapWindow(_window);
+    }
+
+    int SDLWindow::GetSwapInterval() const
+    {
+        int interval;
+        SDL_GL_GetSwapInterval(&interval);
+        return interval;
+    }
+
+    void SDLWindow::SetSwapInterval(int interval)
+    {
+        SDL_GL_SetSwapInterval(interval);
+    }
+
     void SDLWindow::Open(const Tbx::WindowMode& mode)
     {
         _currentMode = mode;
 
         Uint32 flags = SDL_WINDOW_RESIZABLE;
+
+        auto useOpenGl = Tbx::App::GetInstance()->GetGraphicsSettings().Api == Tbx::GraphicsApi::OpenGL;
+        if (useOpenGl)
+        {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+            flags |= SDL_WINDOW_OPENGL;
+        }
+
         switch (_currentMode)
         {
             case Tbx::WindowMode::Windowed: break;
@@ -40,6 +73,12 @@ namespace SDLWindowing
 
         _window = SDL_CreateWindow(_title.c_str(), _size.Width, _size.Height, flags);
         TBX_ASSERT(_window, "SDL_CreateWindow failed: %s", SDL_GetError());
+
+        if (useOpenGl)
+        {
+            _glContext = SDL_GL_CreateContext(_window);
+            TBX_ASSERT(_glContext, "SDL_GL_CreateContext failed: {}", SDL_GetError());
+        }
 
         auto e = Tbx::WindowOpenedEvent(GetId());
         Tbx::EventCoordinator::Send(e);
@@ -57,6 +96,9 @@ namespace SDLWindowing
         // Notify things we've closed
         auto e = Tbx::WindowClosedEvent(GetId());
         Tbx::EventCoordinator::Send(e);
+
+        // Reset the context
+        SDL_GL_DestroyContext(_glContext);
     }
 
     void SDLWindow::Update()
