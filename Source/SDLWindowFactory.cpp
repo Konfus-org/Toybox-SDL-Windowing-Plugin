@@ -1,11 +1,13 @@
 #include "SDLWindowFactory.h"
 #include "SDLWindow.h"
-#include <Tbx/Events/EventCoordinator.h>
+#include <Tbx/App/App.h>
 
 namespace SDLWindowing
 {
     void SDLWindowFactory::OnLoad()
     {
+        TBX_ASSERT(SDL_Init(SDL_INIT_EVENTS) != 0, "Failed to initialize SDL");
+        TBX_ASSERT(SDL_Init(SDL_INIT_VIDEO)  != 0, "Failed to initialize SDL");
     }
 
     void SDLWindowFactory::OnUnload()

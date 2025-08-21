@@ -21,6 +21,7 @@ namespace SDLWindowing
         return _window;
     }
 
+    // TODO: Introduce the concept of a render context to TBX and make this a render context provider plugin!
     Tbx::ProcAddress SDLWindow::GetProcAddress() const
     {
         return SDL_GL_GetProcAddress;
@@ -52,9 +53,26 @@ namespace SDLWindowing
         auto useOpenGl = Tbx::App::GetInstance()->GetGraphicsSettings().Api == Tbx::GraphicsApi::OpenGL;
         if (useOpenGl)
         {
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+            // Set attribute
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#ifdef TBX_DEBUG
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
+            // Validate attributes
+            int att = 0;
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &att);
+            TBX_ASSERT(att == 4, "Failed to set OpenGL context major version to 4");
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &att);
+            TBX_ASSERT(att == 5, "Failed to set OpenGL context minor version to 5");
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &att);
+            TBX_ASSERT(att == SDL_GL_CONTEXT_PROFILE_CORE, "Failed to set OpenGL context profile to core");
+#ifdef TBX_DEBUG
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &att);
+            TBX_ASSERT(att == SDL_GL_CONTEXT_DEBUG_FLAG, "Failed to set OpenGL context debug flag");
+#endif
+
             flags |= SDL_WINDOW_OPENGL;
         }
 
@@ -66,7 +84,7 @@ namespace SDLWindowing
             case Tbx::WindowMode::FullscreenBorderless: 
             {
                 flags |= SDL_WINDOW_FULLSCREEN;
-                flags |= SDL_WINDOW_BORDERLESS; 
+                flags |= SDL_WINDOW_BORDERLESS;
                 break;
             }
         }
@@ -77,7 +95,7 @@ namespace SDLWindowing
         if (useOpenGl)
         {
             _glContext = SDL_GL_CreateContext(_window);
-            TBX_ASSERT(_glContext, "SDL_GL_CreateContext failed: {}", SDL_GetError());
+            TBX_ASSERT(_glContext, "Failed to create gl context for window!");
         }
 
         auto e = Tbx::WindowOpenedEvent(GetId());
