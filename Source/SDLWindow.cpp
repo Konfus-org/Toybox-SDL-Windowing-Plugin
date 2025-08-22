@@ -123,7 +123,30 @@ namespace SDLWindowing
     {
         SDL_Event e;
         SDL_PollEvent(&e);
-        if (e.type == SDL_EVENT_QUIT) Close();
+        switch (e.type)
+        {
+            case SDL_EVENT_QUIT:
+            {
+                Close();
+                break;
+            }
+            case SDL_EVENT_WINDOW_RESIZED:
+            {
+                int w, h;
+                SDL_GetWindowSize(_window, &w, &h);
+                SetSize({ w, h });
+                break;
+            }
+            case SDL_EVENT_WINDOW_FOCUS_GAINED:
+            {
+                Focus();
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
     }
 
     void SDLWindow::Focus()
@@ -154,6 +177,9 @@ namespace SDLWindowing
     {
         _size = size;
         SDL_SetWindowSize(_window, _size.Width, _size.Height);
+
+        auto e = Tbx::WindowResizedEvent(GetId(), _size);
+        Tbx::EventCoordinator::Send(e);
     }
 
     void SDLWindow::SetMode(const Tbx::WindowMode& mode)
