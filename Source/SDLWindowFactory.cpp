@@ -6,12 +6,12 @@ namespace SDLWindowing
 {
     void SDLWindowFactory::OnLoad()
     {
-        TBX_ASSERT(SDL_Init(SDL_INIT_EVENTS) != 0, "Failed to initialize SDL");
         TBX_ASSERT(SDL_Init(SDL_INIT_VIDEO)  != 0, "Failed to initialize SDL");
     }
 
     void SDLWindowFactory::OnUnload()
     {
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
 
     std::shared_ptr<Tbx::IWindow> SDLWindowFactory::Create(const std::string& title, const Tbx::Size& size, const Tbx::WindowMode mode)
