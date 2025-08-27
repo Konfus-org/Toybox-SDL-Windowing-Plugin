@@ -13,7 +13,7 @@ namespace SDLWindowing
 
     Tbx::NativeHandle SDLWindow::GetNativeHandle() const
     {
-        return 0;
+        return SDL_GetDisplayForWindow(_window);
     }
 
     Tbx::NativeWindow SDLWindow::GetNativeWindow() const
