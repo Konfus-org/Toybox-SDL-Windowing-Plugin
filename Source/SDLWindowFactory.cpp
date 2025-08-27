@@ -12,6 +12,7 @@ namespace SDLWindowing
     void SDLWindowFactory::OnUnload()
     {
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        SDL_Quit(); // If we are unloading our windowing quit all of SDL
     }
 
     std::shared_ptr<Tbx::IWindow> SDLWindowFactory::Create(const std::string& title, const Tbx::Size& size, const Tbx::WindowMode mode)
