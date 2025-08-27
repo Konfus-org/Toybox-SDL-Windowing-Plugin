@@ -96,6 +96,7 @@ namespace SDLWindowing
         {
             _glContext = SDL_GL_CreateContext(_window);
             TBX_ASSERT(_glContext, "Failed to create gl context for window!");
+            SDL_GL_MakeCurrent(_window, _glContext);
         }
 
         auto e = Tbx::WindowOpenedEvent(GetId());
@@ -152,6 +153,10 @@ namespace SDLWindowing
     void SDLWindow::Focus()
     {
         SDL_RaiseWindow(_window);
+        if (Tbx::App::GetInstance()->GetGraphicsSettings().Api == Tbx::GraphicsApi::OpenGL)
+        {
+            SDL_GL_MakeCurrent(_window, _glContext);
+        }
 
         auto e = Tbx::WindowFocusedEvent(GetId());
         Tbx::EventCoordinator::Send(e);
