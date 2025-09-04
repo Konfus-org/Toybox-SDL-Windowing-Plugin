@@ -1,6 +1,6 @@
 {
     "name": "SDL3 Windowing",
-    "lib": "SDL3 Windowing.dll",
+    "lib": "SDL3Windowing.dll",
     "type": [
         "Windowing"
     ],
