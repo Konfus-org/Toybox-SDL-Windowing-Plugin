@@ -4,7 +4,7 @@ add_library(SDL3Windowing SHARED)
 file(GLOB_RECURSE INCL CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.*")
 file(GLOB_RECURSE SRCS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.*")
 file(GLOB_RECURSE META CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.meta")
-target_sources(SDL3Windowing PRIVATE ${SRCS} ${INCL} ${ROOT})
+target_sources(SDL3Windowing PRIVATE ${SRCS} ${INCL} ${META})
 
 # Expose include dirs to dependents (build & install time)
 target_include_directories(SDL3Windowing
