@@ -24,7 +24,7 @@ namespace SDLWindowing
     // TODO: Introduce the concept of a render context to TBX and make this a render context provider plugin!
     Tbx::ProcAddress SDLWindow::GetProcAddress() const
     {
-        return static_cast<Tbx::ProcAddress>(SDL_GL_GetProcAddress);
+        return reinterpret_cast<Tbx::ProcAddress>(SDL_GL_GetProcAddress);
     }
 
     void SDLWindow::SwapBuffers()
