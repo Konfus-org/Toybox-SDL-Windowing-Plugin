@@ -78,10 +78,11 @@ namespace SDLWindowing
 
         switch (_currentMode)
         {
-            case Tbx::WindowMode::Windowed: break;
-            case Tbx::WindowMode::Fullscreen: flags |= SDL_WINDOW_FULLSCREEN; break;
-            case Tbx::WindowMode::Borderless: flags |= SDL_WINDOW_BORDERLESS; break;
-            case Tbx::WindowMode::FullscreenBorderless: 
+            using enum Tbx::WindowMode;
+            case Windowed:   break;
+            case Fullscreen: flags |= SDL_WINDOW_FULLSCREEN; break;
+            case Borderless: flags |= SDL_WINDOW_BORDERLESS; break;
+            case FullscreenBorderless: 
             {
                 flags |= SDL_WINDOW_FULLSCREEN;
                 flags |= SDL_WINDOW_BORDERLESS;
@@ -192,24 +193,25 @@ namespace SDLWindowing
         _currentMode = mode;
         switch (_currentMode)
         {
-            case Tbx::WindowMode::Windowed:
+            using enum Tbx::WindowMode;
+            case Windowed:
             {
                 SDL_SetWindowFullscreen(_window, false);
                 SDL_SetWindowBordered(_window, true);
                 break;
             }
-            case Tbx::WindowMode::Fullscreen:
+            case Fullscreen:
             {
                 SDL_SetWindowFullscreen(_window, true);
                 break;
             }
-            case Tbx::WindowMode::Borderless:
+            case Borderless:
             {
                 SDL_SetWindowFullscreen(_window, false);
                 SDL_SetWindowBordered(_window, false);
                 break;
             }
-            case Tbx::WindowMode::FullscreenBorderless:
+            case FullscreenBorderless:
             {
                 SDL_SetWindowFullscreen(_window, true);
                 SDL_SetWindowBordered(_window, false);
