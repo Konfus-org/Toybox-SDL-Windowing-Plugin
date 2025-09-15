@@ -1,12 +1,14 @@
 #pragma once
-#include <Tbx/PluginAPI/RegisterPlugin.h>
-#include <Tbx/Events/WindowEvents.h>
+#include <Tbx/Plugins/Plugin.h>
+#include <Tbx/Windowing/IWindow.h>
 
 namespace SDLWindowing
 {
-    class SDLWindowFactory : public Tbx::IWindowFactoryPlugin
+    class SDLWindowFactory : public Tbx::IWindowFactory, public Tbx::Plugin
     {
     public:
+        SDLWindowFactory(const std::weak_ptr<Tbx::App>& app) {}
+
         void OnLoad() override;
         void OnUnload() override;
 

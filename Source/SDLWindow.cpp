@@ -1,8 +1,7 @@
 #include "SDLWindow.h"
-#include <Tbx/App/App.h>
 #include <Tbx/Events/WindowEvents.h>
-#include <Tbx/Events/EventCoordinator.h>
 #include <Tbx/Debug/Debugging.h>
+#include <SDL3/SDL_video.h>
 
 namespace SDLWindowing
 {
@@ -44,14 +43,11 @@ namespace SDLWindowing
         SDL_GL_SetSwapInterval(interval);
     }
 
-    void SDLWindow::Open(const Tbx::WindowMode& mode)
+    void SDLWindow::Open()
     {
-        _currentMode = mode;
-
         Uint32 flags = SDL_WINDOW_RESIZABLE;
 
-        auto useOpenGl = Tbx::App::GetInstance()->GetGraphicsSettings().Api == Tbx::GraphicsApi::OpenGL;
-        if (useOpenGl)
+        if (_useOpenGl)
         {
             // Set attribute
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -88,20 +84,21 @@ namespace SDLWindowing
                 flags |= SDL_WINDOW_BORDERLESS;
                 break;
             }
+            default:
+            {
+                TBX_ASSERT(false, "Invalid window mode");
+            }
         }
 
         _window = SDL_CreateWindow(_title.c_str(), _size.Width, _size.Height, flags);
         TBX_ASSERT(_window, "SDL_CreateWindow failed: %s", SDL_GetError());
 
-        if (useOpenGl)
+        if (_useOpenGl)
         {
             _glContext = SDL_GL_CreateContext(_window);
             TBX_ASSERT(_glContext, "Failed to create gl context for window!");
             SDL_GL_MakeCurrent(_window, _glContext);
         }
-
-        auto e = Tbx::WindowOpenedEvent(GetId());
-        Tbx::EventCoordinator::Send(e);
     }
 
     void SDLWindow::Close()
@@ -112,10 +109,6 @@ namespace SDLWindowing
         // Cleanup...
         SDL_DestroyWindow(_window);
         _window = nullptr;
-
-        // Notify things we've closed
-        auto e = Tbx::WindowClosedEvent(GetId());
-        Tbx::EventCoordinator::Send(e);
 
         // Reset the context
         SDL_GL_DestroyContext(_glContext);
@@ -134,33 +127,50 @@ namespace SDLWindowing
             }
             case SDL_EVENT_WINDOW_RESIZED:
             {
-                int w, h;
-                SDL_GetWindowSize(_window, &w, &h);
-                SetSize({ w, h });
+                if (e.window.windowID == SDL_GetWindowID(_window))
+                {
+                    int w, h;
+                    SDL_GetWindowSize(_window, &w, &h);
+                    SetSize({ w, h });
+                }
                 break;
             }
             case SDL_EVENT_WINDOW_FOCUS_GAINED:
             {
-                Focus();
+                if (e.window.windowID ==  SDL_GetWindowID(_window))
+                {
+                    Focus();
+                }
                 break;
             }
-            default:
+            case SDL_EVENT_WINDOW_FOCUS_LOST:
             {
-                break;
+                if (e.window.windowID == SDL_GetWindowID(_window))
+                {
+                    _isFocused = false;
+                }
             }
         }
     }
 
     void SDLWindow::Focus()
     {
+        _isFocused = true;
         SDL_RaiseWindow(_window);
-        if (Tbx::App::GetInstance()->GetGraphicsSettings().Api == Tbx::GraphicsApi::OpenGL)
+        if (_useOpenGl)
         {
             SDL_GL_MakeCurrent(_window, _glContext);
         }
+    }
 
-        auto e = Tbx::WindowFocusedEvent(GetId());
-        Tbx::EventCoordinator::Send(e);
+    bool SDLWindow::IsClosed()
+    {
+        return _isClosed;
+    }
+
+    bool SDLWindow::IsFocused()
+    {
+        return _isFocused;
     }
 
     const std::string& SDLWindow::GetTitle() const
@@ -171,6 +181,12 @@ namespace SDLWindowing
     void SDLWindow::SetTitle(const std::string& title)
     {
         _title = title;
+
+        if (!_window)
+        {
+            return;
+        }
+
         SDL_SetWindowTitle(_window, title.c_str());
     }
 
@@ -182,15 +198,23 @@ namespace SDLWindowing
     void SDLWindow::SetSize(const Tbx::Size& size)
     {
         _size = size;
-        SDL_SetWindowSize(_window, _size.Width, _size.Height);
 
-        auto e = Tbx::WindowResizedEvent(GetId(), _size);
-        Tbx::EventCoordinator::Send(e);
+        if (!_window)
+        {
+            return;
+        }
+
+        SDL_SetWindowSize(_window, _size.Width, _size.Height);
     }
 
     void SDLWindow::SetMode(const Tbx::WindowMode& mode)
     {
         _currentMode = mode;
+        if (_window == nullptr)
+        {
+            return;
+        }
+
         switch (_currentMode)
         {
             using enum Tbx::WindowMode;

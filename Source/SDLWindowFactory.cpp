@@ -1,6 +1,6 @@
 #include "SDLWindowFactory.h"
 #include "SDLWindow.h"
-#include <Tbx/App/App.h>
+#include "Tbx/Debug/Debugging.h"
 
 namespace SDLWindowing
 {
@@ -20,8 +20,7 @@ namespace SDLWindowing
         auto window = std::shared_ptr<Tbx::IWindow>(New(), [this](Tbx::IWindow* win) { Delete(win); });
         window->SetTitle(title);
         window->SetSize(size);
-        window->Open(mode);
-        window->Focus();
+        window->SetMode(mode);
         return window;
     }
 

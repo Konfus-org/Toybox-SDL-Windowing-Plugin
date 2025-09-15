@@ -13,10 +13,13 @@ namespace SDLWindowing
         Tbx::NativeWindow GetNativeWindow() const override;
         Tbx::ProcAddress GetProcAddress() const override;
 
-        void Open(const Tbx::WindowMode& mode) override;
+        void Open() override;
         void Close() override;
         void Update() override;
         void Focus() override;
+
+        bool IsClosed() override;
+        bool IsFocused() override;
 
         void SwapBuffers() override;
 
@@ -38,6 +41,9 @@ namespace SDLWindowing
         Tbx::WindowMode _currentMode = Tbx::WindowMode::Windowed;
         Tbx::Size _size = { 800, 800 };
         std::string _title = "New Window";
+        bool _isFocused = false;
+        bool _isClosed = false;
+        bool _useOpenGl = false;
     };
 }
 
