@@ -20,29 +20,6 @@ namespace SDLWindowing
         return _window;
     }
 
-    // TODO: Introduce the concept of a render context to TBX and make this a render context provider plugin!
-    Tbx::ProcAddress SDLWindow::GetProcAddress() const
-    {
-        return reinterpret_cast<Tbx::ProcAddress>(SDL_GL_GetProcAddress);
-    }
-
-    void SDLWindow::SwapBuffers()
-    {
-        SDL_GL_SwapWindow(_window);
-    }
-
-    int SDLWindow::GetSwapInterval() const
-    {
-        int interval;
-        SDL_GL_GetSwapInterval(&interval);
-        return interval;
-    }
-
-    void SDLWindow::SetSwapInterval(int interval)
-    {
-        SDL_GL_SetSwapInterval(interval);
-    }
-
     void SDLWindow::Open()
     {
         Uint32 flags = SDL_WINDOW_RESIZABLE;
@@ -131,7 +108,7 @@ namespace SDLWindowing
                 {
                     int w, h;
                     SDL_GetWindowSize(_window, &w, &h);
-                    SetSize({ w, h });
+                    SetSize(Tbx::Size(w, h));
                 }
                 break;
             }
@@ -150,6 +127,11 @@ namespace SDLWindowing
                     _isFocused = false;
                 }
             }
+        }
+
+        if (_useOpenGl)
+        {
+            SDL_GL_SwapWindow(_window);
         }
     }
 

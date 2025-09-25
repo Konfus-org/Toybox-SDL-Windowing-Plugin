@@ -1,17 +1,16 @@
 #pragma once
-#include <Tbx/Windowing/IWindow.h>
+#include <Tbx/Windowing/Window.h>
 #include <SDL3/SDL.h>
 
 namespace SDLWindowing
 {
-    class SDLWindow : public Tbx::IWindow
+    class SDLWindow : public Tbx::Window
     {
     public:
         ~SDLWindow() override;
 
         Tbx::NativeHandle GetNativeHandle() const override;
         Tbx::NativeWindow GetNativeWindow() const override;
-        Tbx::ProcAddress GetProcAddress() const override;
 
         void Open() override;
         void Close() override;
@@ -20,11 +19,6 @@ namespace SDLWindowing
 
         bool IsClosed() override;
         bool IsFocused() override;
-
-        void SwapBuffers() override;
-
-        int GetSwapInterval() const override;
-        void SetSwapInterval(int interval) override;
 
         const std::string& GetTitle() const override;
         void SetTitle(const std::string& title) override;
