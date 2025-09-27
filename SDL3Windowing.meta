@@ -1,9 +1,5 @@
 {
     "name": "SDL3 Windowing",
-    "lib": "SDL3Windowing.dll",
-    "type": [
-        "Windowing"
-    ],
     "language": "C++",
     "version": "0.0.1",
     "author": "Konfus-dev",

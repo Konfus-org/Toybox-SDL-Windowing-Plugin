@@ -7,6 +7,7 @@ namespace SDLWindowing
     class SDLWindow : public Tbx::Window
     {
     public:
+        SDLWindow(bool useOpenGl);
         ~SDLWindow() override;
 
         Tbx::NativeHandle GetNativeHandle() const override;
