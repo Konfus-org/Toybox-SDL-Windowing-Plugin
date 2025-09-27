@@ -5,8 +5,8 @@
 
 namespace SDLWindowing
 {
-    SDLWindow::SDLWindow(bool useOpenGl)
-        : _useOpenGl(useOpenGl)
+    SDLWindow::SDLWindow(bool useOpenGl, Tbx::Ref<Tbx::EventBus> eventBus)
+        :  _eventBus(eventBus), _useOpenGl(useOpenGl)
     {
     }
 
@@ -25,12 +25,36 @@ namespace SDLWindowing
         return _window;
     }
 
+    void SDLWindow::SetThis(Tbx::WeakRef<Tbx::Window> window)
+    {
+        _this = window;
+    }
+
     void SDLWindow::Open()
     {
         Uint32 flags = SDL_WINDOW_RESIZABLE;
 
         if (_useOpenGl)
         {
+            // Set attribute
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#ifdef TBX_DEBUG
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
+            // Validate attributes
+            int att = 0;
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &att);
+            TBX_ASSERT(att == 4, "SDLWindow: Failed to set OpenGL context major version to 4");
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &att);
+            TBX_ASSERT(att == 5, "SDLWindow: Failed to set OpenGL context minor version to 5");
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &att);
+            TBX_ASSERT(att == SDL_GL_CONTEXT_PROFILE_CORE, "SDLWindow: Failed to set OpenGL context profile to core");
+#ifdef TBX_DEBUG
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &att);
+            TBX_ASSERT(att == SDL_GL_CONTEXT_DEBUG_FLAG, "SDLWindow: Failed to set OpenGL context debug flag");
+#endif
             flags |= SDL_WINDOW_OPENGL;
         }
 
@@ -53,14 +77,18 @@ namespace SDLWindowing
         }
 
         _window = SDL_CreateWindow(_title.c_str(), _size.Width, _size.Height, flags);
-        TBX_ASSERT(_window, "SDL_CreateWindow failed: %s", SDL_GetError());
+        TBX_ASSERT(_window, "SDLWindow: SDL_CreateWindow failed: %s", SDL_GetError());
 
         if (_useOpenGl)
         {
             _glContext = SDL_GL_CreateContext(_window);
-            TBX_ASSERT(_glContext, "Failed to create gl context for window!");
+            TBX_ASSERT(_glContext, "SDLWindow: Failed to create gl context for window!");
             SDL_GL_MakeCurrent(_window, _glContext);
         }
+
+        _isClosed = false;
+
+        _eventBus->Post(Tbx::WindowOpenedEvent(_this.lock()));
     }
 
     void SDLWindow::Close()
@@ -71,20 +99,37 @@ namespace SDLWindowing
         // Cleanup...
         SDL_DestroyWindow(_window);
         _window = nullptr;
+        _isClosed = true;
 
-        // Reset the context
-        SDL_GL_DestroyContext(_glContext);
+        if (_useOpenGl)
+        {
+            // Reset the context
+            SDL_GL_DestroyContext(_glContext);
+        }
+
+        _eventBus->Post(Tbx::WindowClosedEvent(_this.lock()));
     }
 
     void SDLWindow::Update()
     {
-        SDL_Event e;
+        SDL_Event e = {};
         SDL_PollEvent(&e);
         switch (e.type)
         {
             case SDL_EVENT_QUIT:
             {
                 Close();
+                break;
+            }
+            case SDL_EVENT_WINDOW_ENTER_FULLSCREEN:
+            {
+                if (e.window.windowID == SDL_GetWindowID(_window))
+                {
+                    int w, h;
+                    SDL_GetWindowSize(_window, &w, &h);
+                    SetSize(Tbx::Size(w, h));
+                    SetMode(Tbx::WindowMode::Fullscreen);
+                }
                 break;
             }
             case SDL_EVENT_WINDOW_RESIZED:
@@ -128,6 +173,7 @@ namespace SDLWindowing
         {
             SDL_GL_MakeCurrent(_window, _glContext);
         }
+        _eventBus->Post(Tbx::WindowFocusedEvent(_this.lock()));
     }
 
     bool SDLWindow::IsClosed()
@@ -172,6 +218,7 @@ namespace SDLWindowing
         }
 
         SDL_SetWindowSize(_window, _size.Width, _size.Height);
+        _eventBus->Post(Tbx::WindowResizedEvent(_this.lock()));
     }
 
     void SDLWindow::SetMode(const Tbx::WindowMode& mode)

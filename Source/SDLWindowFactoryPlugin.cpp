@@ -1,5 +1,4 @@
 #include "SDLWindowFactoryPlugin.h"
-#include "SDLWindow.h"
 #include <Tbx/App/App.h>
 #include <Tbx/Debug/Debugging.h>
 
@@ -21,9 +20,12 @@ namespace SDLWindowing
         SDL_Quit(); // If we are unloading our windowing quit all of SDL
     }
 
-    std::shared_ptr<Tbx::Window> SDLWindowFactoryPlugin::Create(const std::string& title, const Tbx::Size& size, const Tbx::WindowMode mode)
+    std::shared_ptr<Tbx::Window> SDLWindowFactoryPlugin::Create(const std::string& title, const Tbx::Size& size, const Tbx::WindowMode& mode, Tbx::Ref<Tbx::EventBus> eventBus)
     {
-        auto window = std::shared_ptr<Tbx::Window>(New(), [this](Tbx::Window* win) { Delete(win); });
+        auto* sdlWindow = New(eventBus);
+        auto window = std::shared_ptr<Tbx::Window>((Tbx::Window*)sdlWindow, [this](Tbx::Window* win) { Delete(win); });
+        // HACK: used to get around enable shared from this issues
+        sdlWindow->SetThis(window);
         window->SetTitle(title);
         window->SetSize(size);
         window->SetMode(mode);
@@ -40,9 +42,9 @@ namespace SDLWindowing
         delete window;
     }
 
-    Tbx::Window* SDLWindowFactoryPlugin::New()
+    SDLWindow* SDLWindowFactoryPlugin::New(Tbx::Ref<Tbx::EventBus> eventBus)
     {
-        auto* newWindow = new SDLWindow(_usingOpenGl);
+        auto* newWindow = new SDLWindow(_usingOpenGl, eventBus);
         return newWindow;
     }
 }

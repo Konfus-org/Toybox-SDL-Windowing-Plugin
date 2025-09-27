@@ -4,14 +4,18 @@
 
 namespace SDLWindowing
 {
-    class SDLWindow : public Tbx::Window
+    class SDLWindow 
+        : public Tbx::Window
     {
     public:
-        SDLWindow(bool useOpenGl);
+        SDLWindow(bool useOpenGl, Tbx::Ref<Tbx::EventBus> eventBus);
         ~SDLWindow() override;
 
         Tbx::NativeHandle GetNativeHandle() const override;
         Tbx::NativeWindow GetNativeWindow() const override;
+
+        // HACK: used to get around enable shared from this issues
+        void SetThis(Tbx::WeakRef<Tbx::Window> window);
 
         void Open() override;
         void Close() override;
@@ -31,8 +35,10 @@ namespace SDLWindowing
         Tbx::WindowMode GetMode() override;
 
     private:
+        Tbx::WeakRef<Tbx::Window> _this = {};
         SDL_Window* _window = nullptr;
         SDL_GLContext _glContext = nullptr;
+        Tbx::Ref<Tbx::EventBus> _eventBus = nullptr;
         Tbx::WindowMode _currentMode = Tbx::WindowMode::Windowed;
         Tbx::Size _size = { 800, 800 };
         std::string _title = "New Window";
