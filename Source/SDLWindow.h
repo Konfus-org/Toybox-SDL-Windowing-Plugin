@@ -35,9 +35,9 @@ namespace SDLWindowing
         Tbx::WindowMode GetMode() override;
 
     private:
-        Tbx::WeakRef<Tbx::Window> _this = {};
-        SDL_Window* _window = nullptr;
         SDL_GLContext _glContext = nullptr;
+        SDL_Window* _window = nullptr;
+        Tbx::WeakRef<Tbx::Window> _this = {};
         Tbx::Ref<Tbx::EventBus> _eventBus = nullptr;
         Tbx::WindowMode _currentMode = Tbx::WindowMode::Windowed;
         Tbx::Size _size = { 800, 800 };

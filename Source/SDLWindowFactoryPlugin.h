@@ -6,16 +6,14 @@
 
 namespace SDLWindowing
 {
-    class SDLWindowFactoryPlugin 
+    class SDLWindowFactoryPlugin final
         : public Tbx::Plugin
         , public Tbx::IWindowFactory
     {
     public:
-        SDLWindowFactoryPlugin(std::weak_ptr<Tbx::App> app)
-            : _app(app) {}
+        SDLWindowFactoryPlugin(std::weak_ptr<Tbx::App> app);
+        ~SDLWindowFactoryPlugin() override;
 
-        void OnLoad() override;
-        void OnUnload() override;
         std::shared_ptr<Tbx::Window> Create(
             const std::string& title,
             const Tbx::Size& size,
@@ -29,7 +27,6 @@ namespace SDLWindowing
         void Delete(Tbx::Window* window);
 
     private:
-        std::weak_ptr<Tbx::App> _app = {};
         bool _usingOpenGl = false;
     };
 

@@ -4,18 +4,18 @@
 
 namespace SDLWindowing
 {
-    void SDLWindowFactoryPlugin::OnLoad()
+    SDLWindowFactoryPlugin::SDLWindowFactoryPlugin(Tbx::WeakRef<Tbx::App> app) : Tbx::Plugin(app)
     {
         TBX_ASSERT(SDL_Init(SDL_INIT_VIDEO)  != 0, "Failed to initialize SDL");
 
-        auto tbxApp = _app.lock();
+        auto tbxApp = app.lock();
         _usingOpenGl = tbxApp->GetSettings().Api == Tbx::GraphicsApi::OpenGL;
         tbxApp->GetEventBus().Subscribe(this, &SDLWindowFactoryPlugin::OnAppSettingsChanged);
     }
 
-    void SDLWindowFactoryPlugin::OnUnload()
+    SDLWindowFactoryPlugin::~SDLWindowFactoryPlugin()
     {
-        _app.lock()->GetEventBus().Unsubscribe(this, &SDLWindowFactoryPlugin::OnAppSettingsChanged);
+        GetApp()->GetEventBus().Unsubscribe(this, &SDLWindowFactoryPlugin::OnAppSettingsChanged);
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
         SDL_Quit(); // If we are unloading our windowing quit all of SDL
     }
