@@ -4,18 +4,17 @@
 
 namespace SDLWindowing
 {
-    SDLWindowFactoryPlugin::SDLWindowFactoryPlugin(Tbx::WeakRef<Tbx::App> app) : Tbx::Plugin(app)
+    SDLWindowFactoryPlugin::SDLWindowFactoryPlugin(Tbx::WeakRef<Tbx::App> app) 
+        : Tbx::Plugin(app)
+        , _usingOpenGl(app.lock()->GetSettings().Api == Tbx::GraphicsApi::OpenGL)
+        , _listener(app.lock()->GetEventBus())
     {
         TBX_ASSERT(SDL_Init(SDL_INIT_VIDEO)  != 0, "Failed to initialize SDL");
-
-        auto tbxApp = app.lock();
-        _usingOpenGl = tbxApp->GetSettings().Api == Tbx::GraphicsApi::OpenGL;
-        tbxApp->GetEventBus().Subscribe(this, &SDLWindowFactoryPlugin::OnAppSettingsChanged);
+        _listener.Listen(this, &SDLWindowFactoryPlugin::OnAppSettingsChanged);
     }
 
     SDLWindowFactoryPlugin::~SDLWindowFactoryPlugin()
     {
-        GetApp()->GetEventBus().Unsubscribe(this, &SDLWindowFactoryPlugin::OnAppSettingsChanged);
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
         SDL_Quit(); // If we are unloading our windowing quit all of SDL
     }
@@ -24,11 +23,16 @@ namespace SDLWindowing
     {
         auto* sdlWindow = New(eventBus);
         auto window = std::shared_ptr<Tbx::Window>((Tbx::Window*)sdlWindow, [this](Tbx::Window* win) { Delete(win); });
+
         // HACK: used to get around enable shared from this issues
-        sdlWindow->SetThis(window);
+        {
+            sdlWindow->SetThis(window);
+        }
+
         window->SetTitle(title);
         window->SetSize(size);
         window->SetMode(mode);
+
         return window;
     }
 

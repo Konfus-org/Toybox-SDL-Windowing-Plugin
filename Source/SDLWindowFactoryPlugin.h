@@ -3,6 +3,7 @@
 #include <Tbx/Plugins/Plugin.h>
 #include <Tbx/Windowing/Window.h>
 #include <Tbx/Events/AppEvents.h>
+#include <Tbx/Events/EventListener.h>
 
 namespace SDLWindowing
 {
@@ -27,6 +28,7 @@ namespace SDLWindowing
         void Delete(Tbx::Window* window);
 
     private:
+        Tbx::EventListener _listener = {};
         bool _usingOpenGl = false;
     };
 
