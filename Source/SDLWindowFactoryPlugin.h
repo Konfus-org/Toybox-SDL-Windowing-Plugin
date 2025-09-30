@@ -8,11 +8,11 @@
 namespace SDLWindowing
 {
     class SDLWindowFactoryPlugin final
-        : public Tbx::Plugin
+        : public Tbx::IPlugin
         , public Tbx::IWindowFactory
     {
     public:
-        SDLWindowFactoryPlugin(std::weak_ptr<Tbx::App> app);
+        SDLWindowFactoryPlugin(Tbx::Ref<Tbx::EventBus> eventBus);
         ~SDLWindowFactoryPlugin() override;
 
         std::shared_ptr<Tbx::Window> Create(

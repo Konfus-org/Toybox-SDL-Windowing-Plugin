@@ -1,13 +1,10 @@
 #include "SDLWindowFactoryPlugin.h"
-#include <Tbx/App/App.h>
-#include <Tbx/Debug/Debugging.h>
 
 namespace SDLWindowing
 {
-    SDLWindowFactoryPlugin::SDLWindowFactoryPlugin(Tbx::WeakRef<Tbx::App> app) 
-        : Tbx::Plugin(app)
-        , _usingOpenGl(app.lock()->GetSettings().Api == Tbx::GraphicsApi::OpenGL)
-        , _listener(app.lock()->GetEventBus())
+    SDLWindowFactoryPlugin::SDLWindowFactoryPlugin(Tbx::Ref<Tbx::EventBus> eventBus)
+        : _listener(eventBus)
+        , _usingOpenGl(false)
     {
         TBX_ASSERT(SDL_Init(SDL_INIT_VIDEO)  != 0, "Failed to initialize SDL");
         _listener.Listen(this, &SDLWindowFactoryPlugin::OnAppSettingsChanged);
