@@ -1,5 +1,4 @@
 #pragma 
-#include "SDLWindow.h"
 #include <Tbx/Plugins/Plugin.h>
 #include <Tbx/Windowing/Window.h>
 #include <Tbx/Events/AppEvents.h>
@@ -21,11 +20,9 @@ namespace SDLWindowing
             const Tbx::WindowMode& mode,
             Tbx::Ref<Tbx::EventBus> eventBus) override;
 
-    protected:
+    private:
         void OnAppSettingsChanged(const Tbx::AppSettingsChangedEvent& e);
-
-        SDLWindow* New(Tbx::Ref<Tbx::EventBus> eventBus);
-        void Delete(Tbx::Window* window);
+        void DeleteWindow(Tbx::Window* window);
 
     private:
         Tbx::EventListener _listener = {};

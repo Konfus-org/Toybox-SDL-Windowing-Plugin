@@ -1,4 +1,5 @@
 #include "SDLWindowFactoryPlugin.h"
+#include "SDLWindow.h"
 
 namespace SDLWindowing
 {
@@ -18,8 +19,8 @@ namespace SDLWindowing
 
     std::shared_ptr<Tbx::Window> SDLWindowFactoryPlugin::Create(const std::string& title, const Tbx::Size& size, const Tbx::WindowMode& mode, Tbx::Ref<Tbx::EventBus> eventBus)
     {
-        auto* sdlWindow = New(eventBus);
-        auto window = std::shared_ptr<Tbx::Window>((Tbx::Window*)sdlWindow, [this](Tbx::Window* win) { Delete(win); });
+        auto* sdlWindow = new SDLWindow(_usingOpenGl, eventBus);
+        auto window = std::shared_ptr<Tbx::Window>((Tbx::Window*)sdlWindow, [this](Tbx::Window* win) { DeleteWindow(win); });
 
         // HACK: used to get around enable shared from this issues
         {
@@ -38,14 +39,8 @@ namespace SDLWindowing
         _usingOpenGl = e.GetNewSettings().Api == Tbx::GraphicsApi::OpenGL;
     }
 
-    void SDLWindowFactoryPlugin::Delete(Tbx::Window* window)
+    void SDLWindowFactoryPlugin::DeleteWindow(Tbx::Window* window)
     {
         delete window;
-    }
-
-    SDLWindow* SDLWindowFactoryPlugin::New(Tbx::Ref<Tbx::EventBus> eventBus)
-    {
-        auto* newWindow = new SDLWindow(_usingOpenGl, eventBus);
-        return newWindow;
     }
 }

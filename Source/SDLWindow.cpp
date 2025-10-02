@@ -1,6 +1,6 @@
 #include "SDLWindow.h"
 #include <Tbx/Events/WindowEvents.h>
-#include <Tbx/Debug/Debugging.h>
+#include <Tbx/Debug/Asserts.h>
 #include <SDL3/SDL_video.h>
 
 namespace SDLWindowing
@@ -32,29 +32,11 @@ namespace SDLWindowing
 
     void SDLWindow::Open()
     {
+        _isClosed = false;
         Uint32 flags = SDL_WINDOW_RESIZABLE;
 
         if (_useOpenGl)
         {
-            // Set attribute
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-#ifdef TBX_DEBUG
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-#endif
-            // Validate attributes
-            int att = 0;
-            SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &att);
-            TBX_ASSERT(att == 4, "SDLWindow: Failed to set OpenGL context major version to 4");
-            SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &att);
-            TBX_ASSERT(att == 5, "SDLWindow: Failed to set OpenGL context minor version to 5");
-            SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &att);
-            TBX_ASSERT(att == SDL_GL_CONTEXT_PROFILE_CORE, "SDLWindow: Failed to set OpenGL context profile to core");
-#ifdef TBX_DEBUG
-            SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &att);
-            TBX_ASSERT(att == SDL_GL_CONTEXT_DEBUG_FLAG, "SDLWindow: Failed to set OpenGL context debug flag");
-#endif
             flags |= SDL_WINDOW_OPENGL;
         }
 
@@ -78,16 +60,6 @@ namespace SDLWindowing
 
         _window = SDL_CreateWindow(_title.c_str(), _size.Width, _size.Height, flags);
         TBX_ASSERT(_window, "SDLWindow: SDL_CreateWindow failed: %s", SDL_GetError());
-
-        if (_useOpenGl)
-        {
-            _glContext = SDL_GL_CreateContext(_window);
-            TBX_ASSERT(_glContext, "SDLWindow: Failed to create gl context for window!");
-            SDL_GL_MakeCurrent(_window, _glContext);
-        }
-
-        _isClosed = false;
-
         _eventBus->Post(Tbx::WindowOpenedEvent(_this.lock()));
     }
 
