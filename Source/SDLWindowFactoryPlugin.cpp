@@ -36,7 +36,7 @@ namespace SDLWindowing
 
     void SDLWindowFactoryPlugin::OnAppSettingsChanged(const Tbx::AppSettingsChangedEvent& e)
     {
-        _usingOpenGl = e.GetNewSettings().Api == Tbx::GraphicsApi::OpenGL;
+        _usingOpenGl = e.GetNewSettings().RenderingApi == Tbx::GraphicsApi::OpenGL;
     }
 
     void SDLWindowFactoryPlugin::DeleteWindow(Tbx::Window* window)

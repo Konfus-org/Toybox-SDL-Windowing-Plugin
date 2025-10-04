@@ -7,7 +7,7 @@
 namespace SDLWindowing
 {
     class SDLWindowFactoryPlugin final
-        : public Tbx::IPlugin
+        : public Tbx::Plugin
         , public Tbx::IWindowFactory
     {
     public:
@@ -21,6 +21,7 @@ namespace SDLWindowing
             Tbx::Ref<Tbx::EventBus> eventBus) override;
 
     private:
+        void OnAppLaunched(const Tbx::AppLaunchedEvent& e);
         void OnAppSettingsChanged(const Tbx::AppSettingsChangedEvent& e);
         void DeleteWindow(Tbx::Window* window);
 
